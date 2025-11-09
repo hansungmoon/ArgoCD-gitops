@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"  # Database 다음에 실행
+    argocd.argoproj.io/hook: PreSync    # 앱 배포 전 실행
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    metadata:
+      labels:
+        app: db-migration
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migration
+        image: postgres:14-alpine
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "=== DB Migration 시작 ==="
+          echo "데이터베이스 연결 대기 중..."
+          sleep 5
+
+          echo "테이블 생성 중..."
+          PGPASSWORD=password123 psql -h postgres -U postgres -d myapp -c "
+            CREATE TABLE IF NOT EXISTS users (
+              id SERIAL PRIMARY KEY,
+              name VARCHAR(100),
+              created_at TIMESTAMP DEFAULT NOW()
+            );
+          " || echo "테이블이 이미 존재합니다."
+
+          echo "샘플 데이터 삽입 중..."
+          PGPASSWORD=password123 psql -h postgres -U postgres -d myapp -c "
+            INSERT INTO users (name) VALUES ('Alice'), ('Bob'), ('Charlie')
+            ON CONFLICT DO NOTHING;
+          " || echo "데이터 삽입 완료"
+
+          echo "=== DB Migration 완료 ==="
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+  backoffLimit: 3
