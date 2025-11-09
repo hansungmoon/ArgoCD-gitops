@@ -1,0 +1,11 @@
+apiVersion: v2
+name: myapp
+description: Custom Helm Chart for ArgoCD GitOps Demo
+
+type: application
+version: 0.1.0
+appVersion: "1.25.3"
+
+maintainers:
+  - name: GitOps Team
+    email: gitops@example.com

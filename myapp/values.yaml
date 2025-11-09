@@ -1,0 +1,68 @@
+# Default values for myapp
+# ArgoCD GitOps Demo용 커스텀 Helm Chart
+
+# Replica 설정
+replicaCount: 2
+
+# Container 이미지 설정
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: "1.25.3"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# ServiceAccount 설정
+serviceAccount:
+  create: false
+  automount: false
+  annotations: {}
+  name: ""
+
+# Service 설정
+service:
+  type: ClusterIP
+  port: 80
+
+# Ingress 설정 (비활성화)
+ingress:
+  enabled: false
+
+# 리소스 제한
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "50m"
+  limits:
+    memory: "128Mi"
+    cpu: "100m"
+
+# Health Check
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+# Autoscaling (비활성화)
+autoscaling:
+  enabled: false
+
+# 환경 변수 (선택사항)
+env: []
+# - name: ENVIRONMENT
+#   value: "default"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

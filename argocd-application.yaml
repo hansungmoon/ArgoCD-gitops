@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-gitops
+  namespace: argocd
+spec:
+  project: default
+
+  # Git Repository 설정
+  source:
+    repoURL: https://github.com/hansungmoon/ArgoCD-gitops.git
+    targetRevision: main
+    path: .
+
+  # 배포 대상 클러스터 및 네임스페이스
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+
+  # 자동 동기화 정책
+  syncPolicy:
+    automated:
+      prune: true        # Git에서 삭제된 리소스 자동 제거
+      selfHeal: true     # 클러스터에서 수동 변경 시 Git 상태로 자동 복구
+    syncOptions:
+      - CreateNamespace=true
